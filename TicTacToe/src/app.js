@@ -1,7 +1,7 @@
 var state = {
     players: {
-        nameX: "",
-        nameO: "",
+        nameX: "Player X",
+        nameO: "Player X",
         currentPlayer: "X"
     },
     status: "Player X's turn",
@@ -40,8 +40,8 @@ var state = {
 /******************************* */
 //helpful variables
 /******************************* */
-var xTurn = "Player X's turn";
-var oTurn = "Player O's turn";
+var xTurn = `Player X's turn`;
+var oTurn = `Player O's turn`;
 var statusOnPage = document.getElementsByClassName("status")[0];
 var cells = document.getElementsByClassName("cell");
 
@@ -49,6 +49,16 @@ var cells = document.getElementsByClassName("cell");
 /******************************* */
 //helper functions
 /******************************* */
+
+function getPlayerNameFromGeneric (player) {
+    var designator = player[player.length - 1];
+    if (designator === "X") {
+        return `${state.players.nameX}`
+    }
+    if (designator === "O") {
+        return `${state.players.nameO}`
+    }
+};
 
 //template for updating the status HTML
 function statusHTMLTemplate (newStatus) {
@@ -75,10 +85,12 @@ function updateStatusOnPage (text) {
 function updatePlayerStatus () {
     if (state.status === xTurn){
         state.status = oTurn;
+        updateStatusOnPage(`${state.players.nameO}'s turn`);
     } else if (state.status === oTurn) {
         state.status = xTurn;
+        updateStatusOnPage(`${state.players.nameX}'s turn`);
     }
-    updateStatusOnPage(state.status);
+   
 }
 
 //handles all the state changes which need to occur on a win
@@ -112,13 +124,13 @@ function updateScore (id, player) {
     state.score[player][colId]++;
 
     if (state.score[player][rowId] === 3 || state.score[player][colId] === 3) {
-        announceWinner(player);
+        announceWinner(player, getPlayerNameFromGeneric(player));
         return;
     }
       if (id[0] === id[2]) {
         state.score[player]["dia1"]++;
           if (state.score[player]["dia1"] === 3) {
-              announceWinner(player);
+              announceWinner(player, getPlayerNameFromGeneric(player));
               return;
           }
       }
@@ -126,7 +138,7 @@ function updateScore (id, player) {
     if (id[0] === "2" && id[2] === "2") {
         state.score[player]["dia2"]++;
         if (state.score[player]["dia2"] === 3) {
-            announceWinner(player);
+            announceWinner(player, getPlayerNameFromGeneric(player));
             return;
         }
     }
@@ -134,7 +146,7 @@ function updateScore (id, player) {
       if  ( (id[0] === "3" && id[2]=== "1") || (id[0] === "1" && id[2] === "3") ) {
           state.score[player]["dia2"]++;
           if (state.score[player]["dia2"] === 3) {
-              announceWinner(player);
+              announceWinner(player, getPlayerNameFromGeneric(player));
               return;
           }
       }
@@ -142,10 +154,10 @@ function updateScore (id, player) {
 }
 
 //updates the page and gives an alert of the winner
-function announceWinner (player) {
-    alert(`${player} won!`);
+function announceWinner (player, name) {
+    alert(`${name} won!`);
     state.score[player].won = true;
-    updateStatusOnWin(player);
+    updateStatusOnWin(name);
 }
 
 //changes the visual representation 
@@ -196,7 +208,7 @@ function resetBoard () {
     state.status = "Player X's turn";
     state.players.currentPlayer = "X";
     state.totalMoves=0;
-    updateStatusOnPage("X goes first");
+    updateStatusOnPage(`${state.players.nameX} goes first`);
     Array.prototype.forEach.call(cells, (el) => {
         el.innerHTML = " ";
     })
@@ -218,6 +230,14 @@ Array.prototype.forEach.call(cells, (el)=>{
 
 document.getElementById("reset").addEventListener("click", () => {
     resetBoard();
+});
+
+document.getElementById("player-info").addEventListener("submit", (e) => {
+    e.preventDefault();
+    state.players.nameX = document.getElementById("player-one").value;
+    state.players.nameO = document.getElementById("player-two").value;
+    document.getElementById("form").innerHTML = `<h3>Players</h3>
+    <p>Player X is ${state.players.nameX} and Player O is ${state.players.nameO}`;
 });
 
 
